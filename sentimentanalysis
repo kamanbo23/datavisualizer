@@ -1,0 +1,54 @@
+!pip install textblob
+!pip install matplotlib seaborn
+
+from textblob import TextBlob
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import files
+
+
+df = pd.read_csv('cleaned_reviews.csv')
+
+print(df.head())
+
+def get_sentiment(text):
+    blob = TextBlob(text)
+    return blob.sentiment.polarity, blob.sentiment.subjectivity
+
+df[['polarity', 'subjectivity']] = df['Review'].apply(lambda x: pd.Series(get_sentiment(x)))
+
+print(df.head())
+
+
+print("Polarity Statistics:\n", df['polarity'].describe())
+print("Subjectivity Statistics:\n", df['subjectivity'].describe())
+
+
+df['sentiment'] = df['polarity'].apply(
+    lambda x: 'positive' if x > 0 else ('negative' if x < 0 else 'neutral')
+)
+print(df['sentiment'].value_counts())
+
+sns.countplot(x='sentiment', data=df, palette='viridis')
+plt.title('Sentiment Distribution')
+plt.xlabel('Sentiment')
+plt.ylabel('Count')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='polarity', y='subjectivity', hue='sentiment', data=df, palette='coolwarm')
+plt.title('Polarity vs Subjectivity')
+plt.xlabel('Polarity')
+plt.ylabel('Subjectivity')
+plt.show()
+
+df.to_csv('sentiment_results.csv', index=False)
+files.download('sentiment_results.csv')
+
+text = "I absolutely love this product! It's fantastic and works like a charm."
+blob = TextBlob(text)
+print(f"Polarity: {blob.sentiment.polarity}")
+print(f"Subjectivity: {blob.sentiment.subjectivity}")
+
+print("Sentiment analysis complete and results saved as 'sentiment_results.csv'")
