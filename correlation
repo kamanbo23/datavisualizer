@@ -1,0 +1,46 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('customer.csv')
+
+
+print(df.head())
+
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+
+
+correlation_matrix = df.select_dtypes(include=['number']).corr()
+
+print(correlation_matrix)
+
+
+significant_correlations = correlation_matrix[(correlation_matrix > 0.5) | (correlation_matrix < -0.5)]
+print(significant_correlations)
+
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", vmin=-1, vmax=1)
+plt.title("Correlation Matrix Heatmap")
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='MonthlyCharges', y='TotalCharges', data=df, alpha=0.6, color='blue')
+plt.title("Monthly Charges vs Total Charges")
+plt.xlabel("Monthly Charges ($)")
+plt.ylabel("Total Charges ($)")
+plt.show()
+
+
+df['Churn_Encoded'] = df['Churn'].map({'Yes': 1, 'No': 0})
+correlation_tenure_churn = df['tenure'].corr(df['Churn_Encoded'])
+print(f"Correlation between Tenure and Churn: {correlation_tenure_churn:.2f}")
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='PaymentMethod', y='MonthlyCharges', data=df, palette='pastel')
+plt.title("Monthly Charges by Payment Method")
+plt.xlabel("Payment Method")
+plt.ylabel("Monthly Charges ($)")
+plt.xticks(rotation=45)
+plt.show()
+correlation_matrix.to_csv('correlation_matrix.csv', index=True)
