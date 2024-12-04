@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from google.colab import files
+
+
+
+df = pd.read_csv('amazon_reviews.csv')
+
+
+print(df.head())
+print(df.tail())
+
+print("Mean:", df['Rating'].mean())
+print("Median:", df['Rating'].median())
+print("Mode:", df['Rating'].mode()[0])
+print("Variance:", df['Rating'].var())
+print("Standard Deviation:", df['Rating'].std())
+
+missing_values = df.isnull().sum()
+print("Missing values:\n", missing_values)
+
+df['Rating'].fillna(df['Rating'].mean(), inplace=True)
+
+Q1 = df['Rating'].quantile(0.25)
+Q3 = df['Rating'].quantile(0.75)
+IQR = Q3 - Q1
+outliers = df[(df['Rating'] < (Q1 - 1.5 * IQR)) | (df['Rating'] > (Q3 + 1.5 * IQR))]
+print("Outliers:\n", outliers)
+
+df.to_csv('cleaned_reviews.csv', index=False)
+print("EDA complete and cleaned data saved as 'cleaned_reviews.csv'")
+
+
+plt.figure(figsize=(10, 6))
+plt.hist(df['Rating'], bins=5, edgecolor='black')
+plt.title('Distribution of Ratings')
+plt.xlabel('Rating')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Rating'], bins=5, kde=True)
+plt.title('Distribution of Ratings')
+plt.xlabel('Rating')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Rating', y='Review Length', data=df)
+plt.title('Rating vs Review Length')
+plt.xlabel('Rating')
+plt.ylabel('Review Length')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Rating', data=df)
+plt.title('Box Plot of Ratings')
+plt.xlabel('Rating')
+plt.show()
